@@ -4,7 +4,9 @@ import com.pony.backend.common.BaseResponse;
 import com.pony.backend.common.ResultUtils;
 import com.pony.backend.execption.ErrorCode;
 import com.pony.backend.execption.ThrowUtils;
+import com.pony.backend.model.dto.user.UserLoginRequest;
 import com.pony.backend.model.dto.user.UserRegisterRequest;
+import com.pony.backend.model.vo.user.UserLoginVo;
 import com.pony.backend.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/user")
@@ -28,5 +31,14 @@ public class UserController {
         String checkPassword = userRegisterRequest.getCheckPassword();
         Long result = userService.userRegister(userAccount, userPassword, checkPassword);
         return ResultUtils.success(result);
+    }
+
+    @PostMapping("/login")
+    public BaseResponse<UserLoginVo> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(userLoginRequest == null, ErrorCode.PARAMS_ERROR);
+        String userAccount = userLoginRequest.getUserAccount();
+        String userPassword = userLoginRequest.getUserPassword();
+        UserLoginVo userLoginVo = userService.userLogin(userAccount, userPassword, request);
+        return ResultUtils.success(userLoginVo);
     }
 }
