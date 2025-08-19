@@ -1,7 +1,9 @@
 package com.pony.backend.controller;
 
+import com.pony.backend.annotation.AuthCheck;
 import com.pony.backend.common.BaseResponse;
 import com.pony.backend.common.ResultUtils;
+import com.pony.backend.constant.UserConstant;
 import com.pony.backend.execption.ErrorCode;
 import com.pony.backend.execption.ThrowUtils;
 import com.pony.backend.model.dto.user.UserLoginRequest;
@@ -52,6 +54,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/logout")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
         boolean result = userService.userLogout(request);
         return ResultUtils.success(result);
