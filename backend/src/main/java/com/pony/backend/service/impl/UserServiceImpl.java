@@ -85,6 +85,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return this.getLoginUserVo(user);
     }
 
+    @Override
+    public User getUserLogin(HttpServletRequest request) {
+        Object obj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        User currentUser = (User) obj;
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        Long userId = currentUser.getId();
+        currentUser = this.getById(userId);
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        return currentUser;
+    }
+
+
     /**
      *  获取加密后的密码
      * @param userPassword
@@ -105,6 +121,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         UserLoginVo userLoginVo = new UserLoginVo();
         BeanUtil.copyProperties(user, userLoginVo);
         return userLoginVo;
+    }
+
+    @Override
+    public boolean userLogout(HttpServletRequest request) {
+        Object obj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        User currentUser = (User) obj;
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
+        return false;
     }
 }
 

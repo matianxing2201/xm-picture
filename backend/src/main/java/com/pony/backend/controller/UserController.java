@@ -6,12 +6,10 @@ import com.pony.backend.execption.ErrorCode;
 import com.pony.backend.execption.ThrowUtils;
 import com.pony.backend.model.dto.user.UserLoginRequest;
 import com.pony.backend.model.dto.user.UserRegisterRequest;
+import com.pony.backend.model.entity.User;
 import com.pony.backend.model.vo.user.UserLoginVo;
 import com.pony.backend.service.UserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -40,5 +38,22 @@ public class UserController {
         String userPassword = userLoginRequest.getUserPassword();
         UserLoginVo userLoginVo = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(userLoginVo);
+    }
+
+    @GetMapping("/get/login")
+    public BaseResponse<UserLoginVo> getLoginUser(HttpServletRequest request) {
+        User userLogin = userService.getUserLogin(request);
+        return ResultUtils.success(userService.getLoginUserVo(userLogin));
+    }
+
+    /**
+     * 用户注销
+     * @param request
+     * @return
+     */
+    @PostMapping("/logout")
+    public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
+        boolean result = userService.userLogout(request);
+        return ResultUtils.success(result);
     }
 }
