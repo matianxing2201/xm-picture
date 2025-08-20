@@ -1,21 +1,29 @@
 package com.pony.backend.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pony.backend.constant.UserConstant;
 import com.pony.backend.execption.BusinessException;
 import com.pony.backend.execption.ErrorCode;
+import com.pony.backend.model.dto.user.UserQueryRequest;
 import com.pony.backend.model.entity.User;
 import com.pony.backend.model.enums.UserRoleEnum;
 import com.pony.backend.model.vo.user.UserLoginVo;
+import com.pony.backend.model.vo.user.UserVo;
 import com.pony.backend.service.UserService;
 import com.pony.backend.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * @author mtx
@@ -106,7 +114,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @param userPassword
      * @return 加密后的密码
      */
-    private String getEncryptPassword(String userPassword) {
+    public String getEncryptPassword(String userPassword) {
         final String SALT = "pony";
         return DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
     }
@@ -132,6 +140,44 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
         return false;
+    }
+
+    @Override
+    public UserVo getUserVo(User user) {
+        if (user == null) return null;
+        UserVo userVo = new UserVo();
+        BeanUtil.copyProperties(user, userVo);
+        return userVo;
+    }
+
+    @Override
+    public List<UserVo> getUserVoList(List<User> userList) {
+        if (CollUtil.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream().map(this::getUserVo).collect(Collectors.toList());
+    }
+
+    @Override
+    public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
+        if (userQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Long id = userQueryRequest.getId();
+        String userName = userQueryRequest.getUserName();
+        String userAccount = userQueryRequest.getUserAccount();
+        String userProfile = userQueryRequest.getUserProfile();
+        String userRole = userQueryRequest.getUserRole();
+        String sortField = userQueryRequest.getSortField();
+        String sortOrder = userQueryRequest.getSortOrder();
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(ObjectUtil.isNotNull(id), "id", id);
+        queryWrapper.eq(StrUtil.isNotBlank(userRole), "userRole", userRole);
+        queryWrapper.like(StrUtil.isNotBlank(userAccount), "userAccount", userAccount);
+        queryWrapper.like(StrUtil.isNotBlank(userName), "userName", userName);
+        queryWrapper.like(StrUtil.isNotBlank(userProfile), "userProfile", userProfile);
+        queryWrapper.orderBy(StrUtil.isNotEmpty(sortField), sortOrder.equals("ascend"), sortField);
+        return queryWrapper;
     }
 }
 
