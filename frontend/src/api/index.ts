@@ -10,7 +10,6 @@ const request = axios.create({
 // 全局请求拦截器
 request.interceptors.request.use(
   function (config) {
-    // Do something before request is sent
     return config;
   },
   function (error) {
@@ -28,11 +27,13 @@ request.interceptors.response.use(
       message.warning("请先登录");
       window.location.href = `/user/login?redirect=${window.location.href}`;
     }
-    return response;
+    if (data.code !== 0) {
+      message.error(data.message);
+      return Promise.reject(data);
+    }
+    return data.data;
   },
   function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
     return Promise.reject(error);
   }
 );

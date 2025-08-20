@@ -9,3 +9,14 @@ export interface LoginUserVo {
   userProfile?: string;
   userRole?: string;
 }
+
+export interface LoginRequest {
+  userAccount: string;
+  userPassword: string;
+}
+
+export interface RegisterRequest {
+  checkPassword: string;
+  userAccount: string;
+  userPassword: string;
+}

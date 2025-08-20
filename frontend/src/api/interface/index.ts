@@ -1,3 +1,3 @@
-import * as User from "./user/index";
+import * as IUser from "./user/index";
 
-export { User };
+export { IUser };

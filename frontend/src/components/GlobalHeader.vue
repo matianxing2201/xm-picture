@@ -17,8 +17,8 @@
                 <div class="user-login-status">
                     <a-dropdown>
                         <a-space>
-                            <a-avatar :src="loginUserStore.loginUser.userAvatar" />
-                            {{ loginUserStore.loginUser.userName ?? '旅客' }}
+                            <a-avatar :src="loginUserStore?.loginUser?.userAvatar" />
+                            {{ loginUserStore.loginUser?.userName ?? '旅客' }}
                         </a-space>
                         <template #overlay>
                             <a-menu>
@@ -38,15 +38,18 @@
 <script setup lang='ts'>
 import { LogoutOutlined, } from '@ant-design/icons-vue'
 import { useLoginUserStore } from '@/store/useLoginUserStore'
+import { ApiUser } from '@/api/modules'
 
 const loginUserStore = useLoginUserStore()
 const router = useRouter()
+
+
+
 
 const current = ref<string[]>([]) // 当前菜单
 
 const items = ref([
     { key: '/', label: '主页', title: '主页' },
-    { key: '/login', label: '关于', title: '关于' },
 ])
 // 设置当前高亮菜单
 router.afterEach((to, from, next) => {
@@ -60,7 +63,12 @@ function handleMenuClick({ key }) {
 }
 
 function doLogout() {
-
+    ApiUser.userLogout().then(res => {
+        loginUserStore.setLoginUser({})
+        router.push({
+            path: '/user/login'
+        })
+    })
 }
 </script>
 <style scoped lang='scss'>
