@@ -2,6 +2,8 @@ package com.pony.backend.manager;
 
 import com.pony.backend.config.CosClientConfig;
 import com.qcloud.cos.COSClient;
+import com.qcloud.cos.model.COSObject;
+import com.qcloud.cos.model.GetObjectRequest;
 import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import org.springframework.stereotype.Component;
@@ -28,5 +30,15 @@ public class CosManager {
         PutObjectRequest putObjectRequest = new PutObjectRequest(cosClientConfig.getBucket(), key, file);
 
         return cosClient.putObject(putObjectRequest);
+    }
+
+    /**
+     * 下载对象
+     * @param key
+     * @return
+     */
+    public COSObject getObject (String key) {
+        GetObjectRequest getObjectRequest = new GetObjectRequest(cosClientConfig.getBucket(), key);
+        return cosClient.getObject(getObjectRequest);
     }
 }

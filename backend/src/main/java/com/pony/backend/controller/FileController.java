@@ -3,7 +3,12 @@ package com.pony.backend.controller;
 import com.pony.backend.annotation.AuthCheck;
 import com.pony.backend.common.BaseResponse;
 import com.pony.backend.common.ResultUtils;
+import com.pony.backend.execption.BusinessException;
+import com.pony.backend.execption.ErrorCode;
 import com.pony.backend.manager.CosManager;
+import com.qcloud.cos.model.COSObject;
+import com.qcloud.cos.model.COSObjectInputStream;
+import com.qcloud.cos.utils.IOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 
@@ -51,6 +57,32 @@ public class FileController {
                 }
             }
         }
+    }
 
+    @AuthCheck(mustRole = "admin")
+    @PostMapping("/test/download")
+    public void testDownloadFile (String filePath, HttpServletResponse response) throws IOException {
+        COSObjectInputStream cosObjectInputStream = null;
+
+        COSObject cosObject = cosManager.getObject(filePath);
+        cosObjectInputStream = cosObject.getObjectContent();
+
+        byte[] bytes = null;
+        try {
+            bytes = IOUtils.toByteArray(cosObjectInputStream);
+
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + filePath);
+
+            response.getOutputStream().write(bytes);
+            response.getOutputStream().flush();
+        } catch (IOException e) {
+            log.error("file download error, filepath = {}", filePath);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "下载失败");
+        } finally {
+            if (cosObjectInputStream != null) {
+                cosObjectInputStream.close();
+            }
+        }
     }
 }
